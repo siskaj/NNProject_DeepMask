@@ -1,7 +1,11 @@
-from keras.models import *
+from keras.models import Sequential, Model
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
+
+from keras import layers
+from keras import Input
+
 import cv2, numpy as np
 import urllib
 
@@ -58,6 +62,10 @@ def VGG_16(weights_path=None):
 
 
 def VGG_16_graph():
+    input_tensor = Input(shape=(224,224,3), name='input')
+
+
+
     model = Graph()
     model.add_input(name='input', input_shape=(3, 224, 224))
     model.add_node(ZeroPadding2D((1,1)), name='pad1', input='input')

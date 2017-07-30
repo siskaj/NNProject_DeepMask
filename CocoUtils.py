@@ -46,7 +46,7 @@ class CocoUtils(object):
             plt.imshow(read_img)
             self.coco.showAnns(annotations)
         else:
-            print 'cannot show invalid annotation'
+            print('cannot show invalid annotation')
 
     def get_images_data(self):
         # each item is image_id, image_file_name

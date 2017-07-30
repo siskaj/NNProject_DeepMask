@@ -94,6 +94,12 @@ def load_saved_net():
     net.load_weights(graph_weights_path)
     return net
 
+def nacti_ulozeny_model():
+    print_debug('loading net...')
+    net = model_from_json(open(graph_arch_path).read())
+    net.load_weights(graph_weights_path)
+    return net
+
 
 def create_net():
     print_debug('creating net...')
@@ -102,6 +108,14 @@ def create_net():
     print_debug('net created:')
     print net.summary()
     return net
+
+def create_model():
+    print_debug('creating model...')
+    net_generator = FullNetGenerator(original_net_weights_path)
+    model = net_generator.create_full_model()
+    print_debug('model created:')
+    print model.summary()
+    return model
 
 
 def compile_net(net):
@@ -117,6 +131,12 @@ def save_net(net):
     json_string = net.to_json()
     open(graph_arch_path, 'w').write(json_string)
     net.save_weights(graph_weights_path)
+
+def uloz_model(model):
+    print_debug('saving model...')
+    json_string = model.to_json()
+    open(graph_arch_path, 'w').write(json_string)
+    model.save_weights(graph_weights_path)
 
 
 def example_name_to_result(ex_name):
@@ -168,11 +188,15 @@ def main():
 
     if saved_net_exists():
         graph = load_saved_net()
+        model = nacti_ulozeny_model()
     else:
         graph = create_net()
         save_net(graph)
 
-    compile_net(graph)  # current keras version cannot load compiled net with custom loss function
+        model = create_model()
+        uloz_model(model)
+
+    compile_net(model)  # current keras version cannot load compiled net with custom loss function ???
     print_debug('preparing data...')
 
     train_images, train_expected_scores, train_expected_masks = prepare_data(train_images_path)
@@ -186,10 +210,10 @@ def main():
 
     for round_number in range(first_round, rounds + 1):
         print_debug('starting round %d:' % round_number)
-        graph.fit({'input': train_images, 'seg_output': train_expected_masks, 'score_output': train_expected_scores},
-                  nb_epoch=epochs_per_round, batch_size=batch_size, verbose=0, shuffle=True)
+        model.fit({'input': train_images, 'seg_output': train_expected_masks, 'score_output': train_expected_scores},
+                  epochs = epochs_per_round, batch_size=batch_size, verbose=0, shuffle=True)
         print_debug('Evaluating...')
-        train_loss, test_loss = evaluate_net_loss(graph, train_images, train_expected_scores, train_expected_masks,
+        train_loss, test_loss = evaluate_net_loss(model, train_images, train_expected_scores, train_expected_masks,
                                                   test_images, test_expected_scores, test_expected_masks, loss_file)
         if is_exploding_loss(train_loss):
             print_debug("Loss %s too big- stopping" % train_loss)
@@ -197,9 +221,9 @@ def main():
 
         train_losses.append(train_loss)
         test_losses.append(test_loss)
-        evaluate_net_predictions_if_needed(graph, round_number, train_images, test_images,
+        evaluate_net_predictions_if_needed(model, round_number, train_images, test_images,
                                            train_expected_scores, test_expected_scores, score_predictions_file)
-        backup_net(graph, round_number)
+        backup_net(model, round_number)
 
     loss_file.close()
 

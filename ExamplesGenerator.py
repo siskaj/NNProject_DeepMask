@@ -28,7 +28,7 @@ class ExamplesGenerator(object):
             if not os.path.isfile(pic_path):
                 stats.img_not_found += 1
                 if self.debug:
-                    print 'image %d does not exist' % pic_id
+                    print('image %d does not exist' % pic_id)
                 continue  # img does not exist
 
             stats.img_exists += 1
@@ -36,7 +36,7 @@ class ExamplesGenerator(object):
             annotations = self.coco_utils.get_img_annotations(pic_id)
             if not self.coco_utils.are_legal_anotations(annotations):
                 if self.debug:
-                    print 'illegal annotations for picture %s' % pic_id
+                    print('illegal annotations for picture %s' % pic_id)
                 stats.img_with_illegal_annotations += 1
                 continue
 
@@ -59,7 +59,7 @@ class ExamplesGenerator(object):
 
             if (examples_to_generate is not None
                and examples_to_generate <= stats.positives_generated + stats.negatives_generated):
-                print 'Generated enough examples- stopping'
+                print('Generated enough examples- stopping')
                 break
         return stats
 
@@ -81,7 +81,7 @@ class ExamplesGenerator(object):
 
         if self.patch_exceeds_pic(seg_patch, pic_patch):
             if self.debug:
-                print 'segment %d in picture %d cannot be centered (too close to the edges)' % (seg_id, pic_id)
+                print('segment %d in picture %d cannot be centered (too close to the edges)' % (seg_id, pic_id))
             stats.seg_too_close_to_edges += 1
             return None
 
@@ -158,13 +158,13 @@ class ExamplesGenerator(object):
         max_dim = max(seg_height, seg_width)
         if max_dim > self.max_object_size:
             if self.debug:
-                print 'segment %d in picture %d is too big' % (seg_id, pic_id)
+                print('segment %d in picture %d is too big' % (seg_id, pic_id))
             stats.seg_too_big += 1
             return True
 
         if max_dim < self.max_object_size:
             if self.debug:
-                print 'segment %d in picture %d is too small' % (seg_id, pic_id)
+                print('segment %d in picture %d is too small' % (seg_id, pic_id))
             stats.seg_too_small += 1
             return True
         return False
@@ -331,4 +331,4 @@ class Patch(object):
 # eg = ExamplesGenerator('..', 'val2014', 'images_val', 'Results/pos-val', 'Results/neg-val')
 eg = ExamplesGenerator('..', 'train2014', 'images_train', 'Results/pos-train', 'Results/neg-train')
 stats_res = eg.generate_examples()
-print stats_res
+print(stats_res)
